@@ -85,7 +85,7 @@ input {
   border: 1px solid $mainColor;
 }
 .blue {
-  color: mainColor;
+  color: $mainColor;
 }
 .radio-blue {
   position: relative;
@@ -105,8 +105,11 @@ input {
   border-radius: 50%;
 }
 .border {
-  border: 1px solid $mainColor;
+  border: 1px solid $mainBorderColor;
   border-radius: 4px;
+}
+.blue.border {
+  border-color: $mainColor;
 }
 .medium {
   width: 105px;

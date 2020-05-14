@@ -1,7 +1,7 @@
 <template>
   <label
     class="form-label"
-    :class="[{'blue': value}, {'disabled': disabled}, {'border': border}, {[size]: border}, {'checked': value}]"
+    :class="[{'blue': value}, {'disabled': disabled || data.disabled}, {'border': border}, {[sizeName]: border || data.size}, {'checked': value || isChecked}]"
   >
     <span class="input-checkbox"></span>
     <input
@@ -53,39 +53,60 @@ export default {
   },
   data() {
     return {
-      data: this.$parent
+      data: ""
     };
   },
   methods: {
     change: function() {
-      if (this.value) {
-        this.$emit("checked", this.trueLabel);
+      if (this.value || this.groupValue) {
+        this.$emit("checked", this.label + "/not");
       } else {
-        this.$emit("checked", this.falseLabel);
+        this.$emit("checked", this.label);
       }
       this.$emit("input", !this.value);
     }
   },
-  watch: {
-    data: function() {
-      console.log(this.data);
-      for (let i = 0; i < this.data.value.length; i++) {
-        if (this.data.value[i] == this.label) {
-          this.checked = true;
-          this.value = true;
+  computed: {
+    isChecked: function() {
+      if (this.data != "") {
+        let value = this.data.value;
+        for (let i = 0; i < value.length; i++) {
+          if (value[i] == this.label) {
+            return true;
+          }
         }
       }
+      return false;
+    },
+    groupValue: function() {
+      if (this.data != "") {
+        let value = this.data.value;
+        for (let i = 0; i < value.length; i++) {
+          if (value[i] == this.label) {
+            return true;
+          }
+        }
+      }
+      return false;
+    },
+    sizeName: function() {
+      if (this.data != "") {
+        let size = this.data.size;
+        if (size) {
+          return size;
+        }
+      }
+      return this.size;
     }
   },
   mounted: function() {
     this.$nextTick(function() {
-      console.log(this.data.value);
-    //   for (let i = 0; i < this.data.value.length; i++) {
-    //     if (this.data.value[i] == this.label) {
-    //       this.checked = true;
-    //       this.value = true;
-    //     }
-    //   }
+      let parent = this.$parent;
+      if (parent.$options._componentTag == "VcheckboxGroup") {
+        this.data = parent;
+      } else {
+        this.data = "";
+      }
     });
   }
 };
@@ -121,18 +142,6 @@ input {
 .input-checkbox:hover {
   border-color: #409eff;
 }
-.input-checkbox::after {
-  position: absolute;
-  left: 5px;
-  top: 2px;
-  height: 7px;
-  width: 3px;
-  content: "";
-  border: 1px solid #fff;
-  border-left: 0;
-  border-top: 0;
-  transform: rotate(45deg) scaleY(1);
-}
 .form-label.border {
   padding: 9px 20px 9px 0;
   border-radius: 4px;
@@ -144,6 +153,18 @@ input {
 .checked .input-checkbox {
   background: #409eff;
   border-color: #409eff;
+}
+.checked .input-checkbox::after {
+  position: absolute;
+  left: 5px;
+  top: 2px;
+  height: 7px;
+  width: 3px;
+  content: "";
+  border: 1px solid #fff;
+  border-left: 0;
+  border-top: 0;
+  transform: rotate(45deg) scaleY(1);
 }
 .border.checked {
   border-color: #409eff;
@@ -168,7 +189,7 @@ input {
 }
 .disabled {
   color: #c0c4cc;
-  cursor: pointer;
+  cursor: not-allowed;
 }
 .disabled.border {
   border-color: #ebeef5;

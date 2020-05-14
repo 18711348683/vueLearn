@@ -1,5 +1,6 @@
 <template>
   <div
+    class="group-checkbox"
     :value="value"
     :size="size"
     :disabled="disabled"
@@ -31,10 +32,12 @@ export default {
       type: Number
     },
     textColor: {
-      type: String
+      type: String,
+      default: "white"
     },
     fill: {
-      type: String
+      type: String,
+      default: "#409eff"
     }
   }
 };
