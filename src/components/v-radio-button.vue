@@ -2,10 +2,16 @@
   <label class="button-radio">
     <span
       class="button-span"
-      :class="[{'isActive': label == data.value}, {'disabled': disabled || data.disabled}, [data.size]]"
+      :class="[{'isActive': label == data.value}, 
+      {'disabled': disabled || data.disabled}, 
+      [data.size]]"
       :style="label == data.value ? activeStyle:null"
     >{{label}}</span>
-    <input type="radio" :name="name" :disabled="disabled" @click="change"/>
+    <input 
+    type="radio" 
+    :name="name" 
+    :disabled="disabled || data.disabled" 
+    @click="change" />
   </label>
 </template>
 <script>
@@ -25,7 +31,7 @@ export default {
   data() {
     return {
       data: this.$parent
-    }
+    };
   },
   computed: {
     activeStyle: function() {
@@ -38,7 +44,7 @@ export default {
   },
   methods: {
     change: function() {
-      this.$emit('input', this.label)
+      this.$emit("input", this.label);
     }
   }
 };
@@ -47,12 +53,14 @@ export default {
 .button-radio {
   position: relative;
 }
+
 input {
   position: absolute;
   opacity: 0;
   top: 0;
   left: 0;
 }
+
 .button-span {
   display: inline-block;
   font-size: $fontSize;
@@ -63,24 +71,30 @@ input {
   cursor: pointer;
   border-left: 0;
 }
+
 .button-span:hover {
   color: $mainColor;
 }
+
 .small {
   padding: 10px 20px;
 }
+
 .mini {
   padding: 9px 15px;
 }
+
 .disabled {
   color: $disabledColor;
   cursor: not-allowed;
   background-color: $mainBackgroundColor;
   border-color: $disabledBorderColor;
 }
+
 .disabled:hover {
   color: $disabledColor;
 }
+
 .disabled.isActive {
   background-color: #f2f6fc !important;
   color: $disabledColor !important;

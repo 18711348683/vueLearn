@@ -19,17 +19,19 @@ export default {
     value: {},
     size: {
       type: String,
-      default: "medium"
+      default: "small"
     },
     disabled: {
       type: Boolean,
       default: false
     },
     min: {
-      type: Number
+      type: Number,
+      default: 1
     },
     max: {
-      type: Number
+      type: Number,
+      default: 3
     },
     textColor: {
       type: String,

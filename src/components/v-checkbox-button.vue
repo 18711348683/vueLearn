@@ -9,7 +9,7 @@
       type="checkbox"
       :label="label"
       :name="name"
-      :disabled="disabled"
+      :disabled="disabled || data.disabled"
       :trueLabel="trueLabel"
       :falseLabel="falseLabel"
       :checked="checked"
@@ -44,12 +44,15 @@ export default {
   },
   methods: {
     change: function() {
+      let value = this.data.value;
+      this.label.split("");
       if (this.isChecked) {
-        this.$emit("checked", this.label + "/not");
+        var pos = value.indexOf(this.label);
+        value.splice(pos, 1);
       } else {
-        this.$emit("checked", this.label);
+        value.push(this.label);
       }
-      this.$emit("input", !this.isChecked);
+      this.$emit("checked", value);
     }
   },
   computed: {

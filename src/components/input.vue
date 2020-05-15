@@ -12,8 +12,9 @@
       @mouseleave="mouseleave"
       :maxlength="maxlength"
     />
-    <span v-if="isClearable" class="clearable"></span>
-    <span></span>
+    <span v-if="isClearable"  class="clearable">
+      <i class="icon-no-connect"></i>
+    </span>
   </div>
 </template>
 <script>
@@ -35,17 +36,19 @@ export default {
       type: Boolean
     },
     placeholder: {
-      type: String
+      type: String,
+      default: "请输入内容"
     },
     clearable: {
-      type: Boolean
+      type: Boolean,
+      default: true
     },
     showPassword: {
       type: Boolean
     },
     disabled: {
       type: Boolean,
-      default: true
+      default: false
     },
     size: {
       type: String
@@ -93,12 +96,13 @@ export default {
   },
   data() {
     return {
-      isFocus: false
+      isFocus: false,
+      isClearable: false
     };
   },
   methods: {
     input: function() {
-      this.$emit("input", this.value);
+      this.$emit("input", event.target.value);
     },
     focus: function() {
       this.isFocus = true;
@@ -116,35 +120,55 @@ export default {
 
   },
   computed: {
-      isClearable: function() {
-          return this.clearable && this.value != '' && this.isFocus;
-      }
+      
+  },
+  mounted: function() {
+    this.$nextTick(function() {
+      this.isClearable = this.clearable && this.value != '' && this.isFocus
+    });
   }
 };
 </script>
-<style scoped>
+<style scoped lang="stylus">
 .v-input {
+  position: relative;
+  display: inline-block;
   width: 180px;
-  font-size: 14px;
+  font-size: $fontSize;
+  text-align: center;
 }
 input {
   display: inline-block;
   width: 100%;
   height: 40px;
   padding: 0 15px;
-  color: #606266;
+  color: $mainTextColor;
   background: #fff;
   line-height: 40px;
   outline: none;
+  box-sizing: border-box;
   border-radius: 4px;
-  border: 1px solid #dcdfe6;
+  border: 1px solid $mainBorderColor;
   cursor: pointer;
 }
 input:focus {
-    border-color: #409eff;
+    border-color: $mainColor;
+}
+.clearable {
+  position: absolute;
+  width: 25px;
+  height: 100%;
+  line-height: 40px;
+  top: 0;
+  right: 5px;
+  color: $disabledColor;
+  cursor: pointer;
+}
+.clearable:hover {
+  color: #909399;
 }
 .disabled {
-    color: #c0c4cc;
+    color: $disabledColor;
     background: #f5f7fa;
     cursor: not-allowed;
 }

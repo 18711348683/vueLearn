@@ -1,7 +1,11 @@
 <template>
   <label
     class="form-label"
-    :class="[{'blue': value}, {'disabled': disabled || data.disabled}, {'border': border}, {[sizeName]: border || data.size}, {'checked': value || isChecked}]"
+    :class="[
+    {'disabled': disabled || data.disabled || isDisabled}, 
+    {'border': border}, {[sizeName]: border}, 
+    {'checked': value || groupValue}, 
+    {'indeterminate': indeterminate && !value}]"
   >
     <span class="input-checkbox"></span>
     <input
@@ -9,12 +13,14 @@
       :value="value"
       :name="name"
       @change="change"
+      :disabled="disabled || data.disabled || isDisabled"
       :label="label"
       :checked="checked"
       :trueLabel="trueLabel"
       :falseLabel="falseLabel"
+      :indeterminate="indeterminate"
     />
-    {{ title }}
+    {{ label }}
   </label>
 </template>
 <script>
@@ -58,28 +64,24 @@ export default {
   },
   methods: {
     change: function() {
-      if (this.value || this.groupValue) {
-        this.$emit("checked", this.label + "/not");
+      if (this.data) {
+        let value = this.data.value;
+        this.label.split("");
+        if (this.groupValue) {
+          var pos = value.indexOf(this.label);
+          value.splice(pos, 1);
+        } else {
+          value.push(this.label);
+        }
+        this.$emit("checked", value);
       } else {
-        this.$emit("checked", this.label);
+        this.$emit("input", !this.value);
       }
-      this.$emit("input", !this.value);
     }
   },
   computed: {
-    isChecked: function() {
-      if (this.data != "") {
-        let value = this.data.value;
-        for (let i = 0; i < value.length; i++) {
-          if (value[i] == this.label) {
-            return true;
-          }
-        }
-      }
-      return false;
-    },
     groupValue: function() {
-      if (this.data != "") {
+      if (this.data) {
         let value = this.data.value;
         for (let i = 0; i < value.length; i++) {
           if (value[i] == this.label) {
@@ -90,13 +92,30 @@ export default {
       return false;
     },
     sizeName: function() {
-      if (this.data != "") {
+      if (this.data) {
         let size = this.data.size;
         if (size) {
           return size;
         }
       }
       return this.size;
+    },
+    isDisabled: function() {
+      if (this.data) {
+        let value = this.data.value;
+        let min = this.data.min;
+        let max = this.data.max;
+        if (value.length == min) {
+          if (this.groupValue) {
+            return true;
+          }
+        } else if (value.length == max) {
+          if (!this.groupValue) {
+            return true;
+          }
+        }
+      }
+      return false;
     }
   },
   mounted: function() {
@@ -105,19 +124,19 @@ export default {
       if (parent.$options._componentTag == "VcheckboxGroup") {
         this.data = parent;
       } else {
-        this.data = "";
+        this.data = false;
       }
     });
   }
 };
 </script>
-<style scoped>
+<style scoped lang="stylus">
 .form-label {
   position: relative;
   display: inline-block;
   margin-left: 20px;
-  font-size: 14px;
-  color: #606266;
+  font-size: $fontSize;
+  color: $mainTextColor;
   cursor: pointer;
 }
 input {
@@ -131,8 +150,8 @@ input {
   display: inline-block;
   width: 14px;
   height: 14px;
-  background: #fff;
-  border: 1px solid #dcdfe6;
+  background: $mainBackgroundColor;
+  border: 1px solid $mainBorderColor;
   border-radius: 2px;
   vertical-align: middle;
   margin-top: -2px;
@@ -140,19 +159,36 @@ input {
   margin-right: 10px;
 }
 .input-checkbox:hover {
-  border-color: #409eff;
+  border-color: $mainColor;
 }
 .form-label.border {
   padding: 9px 20px 9px 0;
   border-radius: 4px;
-  border: 1px solid #dcdfe6;
+  border: 1px solid $mainBorderColor;
 }
 .form-label.small {
   padding: 9px 20px 9px 0;
 }
 .checked .input-checkbox {
-  background: #409eff;
-  border-color: #409eff;
+  background: $mainColor;
+  border-color: $mainColor;
+}
+.indeterminate .input-checkbox {
+  background: $mainColor;
+  border-color: $mainColor;
+}
+.indeterminate .input-checkbox::after {
+  position: absolute;
+  left: 4px;
+  right: 0;
+  width: 6px;
+  height: 1px;
+  top: 6px;
+  content: "";
+  background:  $mainBackgroundColor;
+}
+.checked {
+  color: $mainColor;
 }
 .checked .input-checkbox::after {
   position: absolute;
@@ -161,13 +197,13 @@ input {
   height: 7px;
   width: 3px;
   content: "";
-  border: 1px solid #fff;
+  border: 1px solid $mainBackgroundColor;
   border-left: 0;
   border-top: 0;
   transform: rotate(45deg) scaleY(1);
 }
 .border.checked {
-  border-color: #409eff;
+  border-color: $mainColor;
 }
 .small.form-label {
   padding: 7px 20px 7px 0;
@@ -184,21 +220,19 @@ input {
   top: 1px;
   left: 4px;
 }
-.blue {
-  color: #409eff;
-}
 .disabled {
-  color: #c0c4cc;
+  color: $disabledColor;
   cursor: not-allowed;
 }
 .disabled.border {
-  border-color: #ebeef5;
+  border-color: $disabledBorderColor;
 }
 .disabled .input-checkbox {
   background: #f5f7fa;
   border: 1px solid #e4e7ed;
 }
 .disabled .input-checkbox::after {
-  border-color: #c0c4cc;
+  border-color: $disabledColor;
 }
+
 </style>
