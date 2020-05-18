@@ -94,7 +94,12 @@
       ></vcheckbox>
     </VcheckboxGroup> -->
 
-    <Vinput v-model="inputValue"></Vinput>
+    <Vinput v-model="inputValue" maxlength="10" showWordLimit=true></Vinput>
+    <!-- <Vinput v-model="inputValue" clearable=true></Vinput>
+    <Vinput v-model="inputValue" showPassword=true></Vinput>
+    <Vinput v-model="inputValue" suffixIcon="icon-table2"></Vinput>
+    <Vinput v-model="inputValue" prefixIcon="icon-search"></Vinput>
+    <Vinput v-model="inputValue" type="textarea" :autosize=4></Vinput> -->
 
   </div>
 </template>
@@ -162,7 +167,8 @@ export default {
     },
     //处理indeterminate checkbox
     handleCheckAllChange: function(value) {
-      this.checkedAllCities = value ? this.cities : [];
+      let cities = ["上海", "北京", "广州", "深圳"];
+      this.checkedAllCities = value ? cities : [];
       this.indeterminate = false;
     },
     //处理checkboxbutton的值
