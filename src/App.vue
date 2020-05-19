@@ -94,13 +94,14 @@
       ></vcheckbox>
     </VcheckboxGroup> -->
 
-    <Vinput v-model="inputValue" maxlength="10" showWordLimit=true></Vinput>
-    <!-- <Vinput v-model="inputValue" clearable=true></Vinput>
+    <!-- <Vinput v-model="inputValue" maxlength="10" showWordLimit=true></Vinput>
+    <Vinput v-model="inputValue" clearable=true></Vinput>
     <Vinput v-model="inputValue" showPassword=true></Vinput>
     <Vinput v-model="inputValue" suffixIcon="icon-table2"></Vinput>
     <Vinput v-model="inputValue" prefixIcon="icon-search"></Vinput>
     <Vinput v-model="inputValue" type="textarea" :autosize=4></Vinput> -->
 
+    <VinputNumber v-model="number" :step=3></VinputNumber>
   </div>
 </template>
 
@@ -113,7 +114,8 @@
 // import VcheckboxGroup from "./components/v-checkbox-group.vue";
 // import VcheckboxButton from "./components/v-checkbox-button.vue";
 
-import Vinput from './components/input.vue';
+// import Vinput from './components/input.vue';
+import VinputNumber from './components/input-number.vue';
 
 const cityOptions = ["上海", "北京", "广州", "深圳"];
 export default {
@@ -132,7 +134,8 @@ export default {
       checkedAllCities: ["上海", "广州"],
       checkedButtonCitied: ["上海", "广州"],
       checkedCitiesMax: ["上海", "广州"],
-      inputValue: ""
+      inputValue: "",
+      number: 3
     };
   },
   components: {
@@ -142,7 +145,8 @@ export default {
     // Vcheckbox,
     // VcheckboxGroup,
     // VcheckboxButton,
-    Vinput
+    // Vinput,
+    VinputNumber
   },
   methods: {
     //处理checkbox选中的值
