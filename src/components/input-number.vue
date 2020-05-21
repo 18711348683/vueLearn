@@ -1,36 +1,34 @@
 <template>
-  <div
-    class="container"
-    :class="[{ hoverColor: hoverColor }, { focusColor: isFocus || active }]"
-  >
+  <div class="container" :class="[{ focusColor: isFocus || active }, [size]]">
     <label>{{ label }}</label>
     <span
       class="number-common decrease"
-      :class="[{ active: deActive }, { disabled: minLimit || disabled }]"
+      :class="[{ active: deActive }, { disabled: minLimit || disabled }, [size], [controlsPosition]]"
       @mouseenter="deEnter"
       @mouseleave="deLeave"
       @click="deClick"
-      >-</span
     >
+      <i v-if="controlsPosition != 'right'" class="icon-minus"></i>
+      <i v-if="controlsPosition == 'right'" class="icon-ctrl"></i>
+    </span>
     <input
       type="text"
       class="input"
-      :class="[{ disabled: disabled }]"
-      :value="value"
-      @mouseenter="mouseenter"
-      @mouseleave="mouseleave"
+      :class="[{ disabled: disabled }, [size], {left: controlsPosition == 'right'}]"
+      v-model="innerValue"
       @focus="focus"
       @blur="blur"
-      @input="change"
     />
     <span
       class="number-common increase"
-      :class="[{ active: inActive }, { disabled: maxLimit || disabled }]"
+      :class="[{ active: inActive }, { disabled: maxLimit || disabled }, [size], [controlsPosition]]"
       @mouseenter="inEnter"
       @mouseleave="inLeave"
       @click="inClick"
-      >+</span
     >
+      <i v-if="controlsPosition != 'right'" class="icon-plus"></i>
+      <i v-if="controlsPosition == 'right'" class="icon-ctrl"></i>
+    </span>
   </div>
 </template>
 <script>
@@ -39,70 +37,100 @@ export default {
   props: {
     value: {
       type: Number,
-      default: 0,
+      default: 0
     },
     min: {
-      type: Number,
+      type: Number
     },
     max: {
-      type: Number,
+      type: Number
     },
     step: {
       type: Number,
-      default: 1,
+      default: 1
     },
     stepStrictly: {
       type: Boolean,
-      default: false,
+      default: false
     },
     precision: {
       type: Number,
+      default: 0
     },
     size: {
-      type: String,
+      type: String
     },
     disabled: {
       type: Boolean,
-      default: false,
+      default: false
     },
     controls: {
       type: Boolean,
-      default: false,
+      default: false
     },
     controlsPosition: {
-      type: String,
+      type: String
     },
     name: {
-      type: String,
+      type: String
     },
     label: {
-      type: String,
+      type: String
     },
     placeholder: {
-      type: String,
-    },
+      type: String
+    }
+  },
+  model: {
+    prop: "value",
+    event: "input"
   },
   data() {
     return {
-      hoverColor: false,
       isFocus: false,
       active: false,
       inActive: false,
-      deActive: false,
+      deActive: false
     };
   },
   methods: {
-    mouseenter: function() {
-      this.hoverColor = true;
-    },
-    mouseleave: function() {
-      this.hoverColor = false;
-    },
     focus: function() {
       this.isFocus = true;
     },
     blur: function() {
       this.isFocus = false;
+
+      let newValue = this.financial(event.target.value);
+      let min = this.financial(this.min);
+      let max = this.financial(this.max);
+      let flag = newValue % this.step;
+
+      if (newValue < min) {
+        this.$emit("input", min);
+        return;
+      } else if (newValue > max) {
+        this.$emit("input", max);
+        return;
+      }
+
+      if (this.stepStrictly) {
+        if (flag == 0) {
+          this.$emit("input", newValue);
+          return;
+        } else {
+          this.$emit(
+            "input",
+            this.financial(
+              this.financial(newValue, this.step, "up"),
+              flag,
+              "down"
+            )
+          );
+          return;
+        }
+      }
+
+      this.$emit("input", newValue);
     },
     inEnter: function() {
       if (!this.maxLimit) {
@@ -124,54 +152,73 @@ export default {
       this.deActive = false;
       this.active = false;
     },
-    change: function() {
-      let newValue = parseInt(event.target.value);
-      if (isNaN(newValue)) {
-        this.$emit("input", this.value);
-      } else {
-        if (newValue < parseInt(this.min)) {
-          this.$emit("input", parseInt(this.min));
-        } else if (newValue > parseInt(this.max)) {
-          this.$emit("input", parseInt(this.max));
+    inClick: function() {
+      let value = this.financial(this.value, this.step, "up");
+      let max = this.financial(this.max);
+      if (!this.maxLimit && !this.disabled) {
+        if (value > max) {
+          this.$emit("input", max);
         } else {
-            let flag = newValue % this.step;
-          if (this.stepStrictly && flag == 0) {
-            this.$emit("input", newValue);
+          this.$emit("input", value);
+        }
+      }
+    },
+    deClick: function() {
+      let value = this.financial(this.value, this.step, "down");
+      if (!this.minLimit && !this.disabled) {
+        let min = this.financial(this.min);
+        if (!this.minLimit && !this.disabled) {
+          if (value > min) {
+            this.$emit("input", min);
           } else {
-            this.$emit("input", newValue + this.step - flag);
+            this.$emit("input", value);
           }
         }
       }
     },
-    inClick: function() {
-      if (!this.maxLimit && !this.disabled) {
-        this.$emit("input", parseInt(this.value) + this.step);
+    financial: function(a, b, type) {
+      if (type == "up") {
+        return Number.parseFloat(a + b).toFixed(this.precision) * 1;
+      } else if (type == "down") {
+        return Number.parseFloat(a - b).toFixed(this.precision) * 1;
+      } else {
+        if (a == "") {
+          return "";
+        } else if (isNaN(a)){
+          return Number.parseFloat(this.value).toFixed(this.precision) * 1;
+        } else {
+          return Number.parseFloat(a).toFixed(this.precision) * 1;
+        }
       }
-    },
-    deClick: function() {
-      if (!this.minLimit && !this.disabled) {
-        this.$emit("input", parseInt(this.value) - this.step);
-      }
-    },
+    }
   },
   computed: {
+    innerValue: {
+      get() {
+        return this.financial(this.value);
+      },
+      set(value) {
+        this.$emit("input", this.financial(value));
+      }
+    },
     minLimit() {
-      if (parseInt(this.value) <= parseInt(this.min)) {
+      if (parseFloat(this.value) <= parseFloat(this.min)) {
         return true;
       }
       return false;
     },
     maxLimit() {
-      if (parseInt(this.value) >= parseInt(this.max)) {
+      if (parseFloat(this.value) >= parseFloat(this.max)) {
         return true;
       }
       return false;
-    },
-  },
+    }
+  }
 };
 </script>
 <style scoped lang="stylus">
 .container {
+  position: relative;
   line-height: 38px;
   width: 180px;
   border: 1px solid #dcdfe6;
@@ -179,29 +226,86 @@ export default {
   cursor: pointer;
 }
 
+.container:hover {
+  border-color: #c0c4cc;
+}
+
+.container.focusColor {
+  border-color: #409eff;
+}
+
+.small.container {
+  width: 200px;
+  line-height: 34px;
+}
+
+.mini.container {
+  width: 130px;
+  line-height: 30px;
+}
+
 .number-common {
+  position: relative;
   display: inline-block;
   width: 40px;
   background: #f5f7fa;
   color: #606266;
   text-align: center;
+  font-size: 12px;
+}
+
+.small.number-common {
+  width: 36px;
+}
+
+.mini.number-common {
+  width: 32px;
 }
 
 .decrease {
-  border-radius: 0 0 4px 4px;
+  border-radius: 4px 0 0 4px;
   border-right: 1px solid #dcdfe6;
 }
 
 .increase {
-  border-radius: 4px 4px 0 0;
+  border-radius: 0 4px 4px 0;
   border-left: 1px solid #dcdfe6;
+}
+
+.right {
+  position: absolute;
+  height: 20px;
+  right: 0;
+  border-radius: 0 4px 0 0;
+  border: 0;
+  border-left: 1px solid #dcdfe6;
+}
+
+.right.decrease {
+  bottom: 0;
+}
+
+.right.increase {
+  height: 19px;
+  top: 0;
+  border-bottom: 1px solid #dcdfe6;
+}
+
+.right .icon-ctrl {
+  position: absolute;
+  left: 15px;
+  top: 7px;
+}
+
+.right.decrease .icon-ctrl {
+  top: 2px;
+  transform: rotateX(180deg);
 }
 
 .input {
   appearance: none;
   outline: none;
   width: 98px;
-  height: 38px;
   padding: 0;
   color: #606266;
   text-align: center;
@@ -213,12 +317,18 @@ export default {
   display: inline-block;
 }
 
-.hoverColor {
-  border-color: #c0c4cc;
+.left.input {
+  width: 138px;
 }
 
-.focusColor {
-  border-color: #409eff;
+.small.input {
+  line-height: 34px;
+  width: 126px;
+}
+
+.mini.input {
+  line-height: 30px;
+  width: 64px;
 }
 
 .active {

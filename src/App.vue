@@ -101,7 +101,7 @@
     <Vinput v-model="inputValue" prefixIcon="icon-search"></Vinput>
     <Vinput v-model="inputValue" type="textarea" :autosize=4></Vinput> -->
 
-    <VinputNumber v-model="number" :step=3></VinputNumber>
+    <VinputNumber v-model="number" :max=5 :step=0.1 :precision=2 ></VinputNumber>
   </div>
 </template>
 
@@ -135,7 +135,7 @@ export default {
       checkedButtonCitied: ["上海", "广州"],
       checkedCitiesMax: ["上海", "广州"],
       inputValue: "",
-      number: 3
+      number: 4.12
     };
   },
   components: {
